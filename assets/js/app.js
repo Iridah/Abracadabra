@@ -1,39 +1,47 @@
-// Definicion de Modulos
 const express = require('express');
-const fs = require('fs');
 const chalk = require('chalk');
-const nodemon = require('nodemon');
+const path = require('path');
 
 const app = express();
+const port = 3000;
 
-// Configuración de Express
-app.use(express.json());
-app.use(express.urlencoded({ extended: true })); // Para procesar formularios
-app.use(express.static('public')); // Ruta para archivos estáticos
+// Arreglo de usuarios
+const usuarios = ["Juan", "Jocelyn", "Astrid", "Maria", "Ignacia", "Javier", "Bryan"];
 
-// Configuración de Bootstrap (opcional)
-app.use('/css', express.static(__dirname + '/node_modules/bootstrap/dist/css'));
+// Middleware para verificar el usuario
+const verificarUsuario = (req, res, next) => {
+  const { usuario } = req.params;
+  if (usuarios.includes(usuario)) {
+    next(); // Si el usuario existe, permite el paso
+  } else {
+    res.sendFile(path.join(__dirname, '../img/who.jpeg'));
+  }
+};
+
+// Middleware para servir archivos estáticos
+app.use(express.static(path.join(__dirname, '../')));
 
 // Rutas
-app.use('/abracadabra/usuarios', require('./routes/usuarios'));
-app.use('/abracadabra/juego', require('./routes/juego'));
-app.use('/abracadabra/conejo', require('./routes/conejo'));
-
-// Error handling
-app.use((err, req, res, next) => {
-  console.error(chalk.red('Error:', err));
-  res.status(err.status || 500).json({ message: err.message });
+app.get('/abracadabra/usuarios', (req, res) => {
+  res.json({ usuarios });
 });
 
-// Inicio del servidor
-app.listen(3000, () => {
-  console.log(chalk.green('Servidor escuchando en el puerto 3000'));
+app.get('/abracadabra/juego/:usuario', verificarUsuario, (req, res) => {
+  // Aquí puedes enviar la página del juego (si la tienes)
+  res.send('¡Bienvenido al juego, ' + req.params.usuario + '!');
 });
 
-// Configuración de Nodemon (opcional)
-nodemon.on('start', () => {
-  console.log(chalk.green('Nodemon iniciado'));
+app.get('/abracadabra/conejo/:n', (req, res) => {
+  const numeroAleatorio = Math.floor(Math.random() * 4) + 1; // Genera un número del 1 al 4
+  const imagen = numeroAleatorio == req.params.n ? 'conejito.jpg' : 'voldemort.jpg';
+  res.sendFile(path.join(__dirname, '../img', imagen));
 });
-nodemon.on('watch', () => {
-  console.log(chalk.green('Cambios detectados, reiniciando servidor...'));
+
+// Ruta genérica para 404
+app.use((req, res) => {
+  res.send('Esta página no existe...');
+});
+
+app.listen(port, () => {
+  console.log(chalk.green(`Servidor corriendo en http://localhost:${port}`));
 });

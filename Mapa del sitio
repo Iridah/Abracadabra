@@ -1,0 +1,18 @@
+e1
+ |index.html
+ |package.json
+ |package-lock.json
+ |node_modules
+ |assets
+       |js
+       | |
+       | | app.js
+       |
+       |img
+       |  |conejito.jpg
+       |  |fondo.jpg
+       |  |sombrero.jpg
+       |  |voldemort.jpg
+       |  |who.jpg
+       |
+       |css
